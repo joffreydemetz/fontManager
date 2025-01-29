@@ -1,0 +1,31 @@
+{
+    "name": "jdz/fontmanager",
+    "type": "library",
+    "description": "Manage a local fonts database",
+    "keywords": [
+        "fonts",
+        "fontface",
+        "stylesheet",
+        "googlefonts"
+    ],
+    "homepage": "https://jdz.joffreydemetz.com/fontmanager/",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Joffrey Demetz",
+            "email": "joffrey.demetz@gmail.com",
+            "homepage": "https://joffreydemetz.com",
+            "role": "Lead"
+        }
+    ],
+    "require": {
+        "symfony/yaml": "^6.4",
+        "symfony/filesystem": "^6.4",
+        "tecnickcom/tc-lib-pdf-font": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "JDZ\\FontManager\\": "src"
+        }
+    }
+}
