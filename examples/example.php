@@ -5,7 +5,7 @@ require_once realpath(__DIR__ . '/../vendor/autoload.php');
 use JDZ\FontManager\FontsDb;
 use JDZ\FontManager\Exceptions\FontException;
 
-$googleFontsApiKey = 'AIzaSyDF6IJs0_ChP3lDMEd7_IivahSSuEIblMQ';
+$googleFontsApiKey = 'ENTER YOUR GOOGLE FONT API KEY HERE';
 $subsets = ['latin', 'latin-ext'];
 $formats = ['ttf', 'woff2', 'woff'];
 

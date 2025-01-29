@@ -12,7 +12,7 @@ To include this class in your project, use composer:
 composer require jdz/fontmanager
 ```
 
-## requires 
+## Requires 
 
 *fonttools* is needed to convert TTF files to WOFF and WOFF2 formats
 
@@ -25,6 +25,10 @@ Install the fonttools with the woff extension
 ```bash
 pip install fonttools[woff]
 ```
+
+## Usage
+
+Look at the example.php file for a complete example.
 
 ## License
 
