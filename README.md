@@ -17,10 +17,14 @@ composer require jdz/fontmanager
 *fonttools* is needed to convert TTF files to WOFF and WOFF2 formats
 
 Download and install Python >= 3.8
+
 https://www.python.org/downloads/
 
 Install the fonttools with the woff extension
-`pip install fonttools[woff]`
+
+```bash
+pip install fonttools[woff]
+```
 
 ## License
 
