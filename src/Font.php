@@ -10,6 +10,7 @@
 namespace JDZ\FontManager;
 
 use JDZ\FontManager\FontVariant;
+use JDZ\FontManager\Exceptions\VariantNotAvailableException;
 
 /**
  * @author  Joffrey Demetz <joffrey.demetz@gmail.com>
@@ -53,10 +54,6 @@ class Font implements \JsonSerializable
 
     if (true === $this->installed) {
       $data['installed'] = $this->installed;
-    }
-
-    if (!empty($this->variants)) {
-      $data['variants'] = array_values($this->variants);
     }
 
     if (!empty($this->subsets)) {
@@ -210,7 +207,18 @@ class Font implements \JsonSerializable
     if (isset($this->fontVariants[$id])) {
       return $this->fontVariants[$id];
     }
-    throw new \Exception('Font variant ' . $id . ' not available for ' . $this->id);
+    throw (new VariantNotAvailableException())
+      ->setFontData($this->family, null, null, $id)
+      ->setAvailableVariants($this->getAvailableVariants());
+  }
+
+  public function toFont(string $variantId): object
+  {
+    $data = $this->getFontVariant($variantId)->toFont();
+    $data->family = $this->family;
+    $data->version = $this->version;
+    $data->local = $this->local;
+    return $data;
   }
 
   public function toFile(): array

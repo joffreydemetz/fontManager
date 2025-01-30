@@ -227,13 +227,12 @@ class FontsDb
     }
 
     if (!in_array($variantId, $infos->variants)) {
-      throw (new VariantNotAvailableException('HERE'))
+      throw (new VariantNotAvailableException())
         ->setFontData($family, $weight, $style, $variantId)
         ->setAvailableVariants($this->fonts[$id]->getAvailableVariants());
     }
 
     $variantData = $infos->fontVariants[$variantId];
-    //$variantData->family = $font->getFamily();
 
     if ('' === $variantData->id) {
       $variantData->id = $this->formatVariantId($variantData->weight, $variantData->style);
@@ -301,7 +300,7 @@ class FontsDb
 
     list($family, $id, $weight, $style, $variantId) = $this->parseQueryParams($family, $weight, $style);
 
-    return $this->fonts[$id]->getFontVariant($variantId)->toFont();
+    return $this->fonts[$id]->toFont($variantId);
   }
 
   public function has(string $family, string|int|null $weight = null, ?string $style = null, array $subsets = []): bool

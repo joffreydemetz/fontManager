@@ -26,10 +26,6 @@ Install the fonttools with the woff extension
 pip install fonttools[woff]
 ```
 
-## Usage
-
-Look at the example.php file for a complete example.
-
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
