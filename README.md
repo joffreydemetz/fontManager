@@ -12,6 +12,10 @@ To include this class in your project, use composer:
 composer require jdz/fontmanager
 ```
 
+## Usage
+
+View the example in the `examples` directory.
+
 ## Requires 
 
 *fonttools* is needed to convert TTF files to WOFF and WOFF2 formats

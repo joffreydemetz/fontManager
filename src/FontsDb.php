@@ -72,9 +72,9 @@ class FontsDb
    * - variant is available
    * - subsets are available
    */
-  public function isAvailable(string $family, string|int|null $weight = null, ?string $style = null, array $subsets = []): bool
+  public function isAvailable(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null): bool
   {
-    list($family, $id, $weight, $style, $variantId) = $this->parseQueryParams($family, $weight, $style);
+    list($family, $id, $weight, $style, $variantId, $subsets) = $this->parseQueryParams($family, $weight, $style, $subsets);
 
     // font not in local database
     if (!isset($this->fonts[$id])) {
@@ -105,13 +105,13 @@ class FontsDb
    * - font variant exists
    * - font variant is installed
    */
-  public function isInstalled(string $family, string|int|null $weight = null, ?string $style = null, array $subsets = []): bool
+  public function isInstalled(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null): bool
   {
     if (false === $this->isAvailable($family, $weight, $style, $subsets)) {
       return false;
     }
 
-    list($family, $id, $weight, $style, $variantId) = $this->parseQueryParams($family, $weight, $style);
+    list($family, $id, $weight, $style, $variantId, $subsets) = $this->parseQueryParams($family, $weight, $style, $subsets);
 
     // font variant not available
     if (false === $this->fonts[$id]->hasVariant($variantId)) {
@@ -143,21 +143,21 @@ class FontsDb
    * Check if requested font variant is available and installed
    * @throws  FontException
    */
-  public function check(string $family, string|int|null $weight = null, ?string $style = null, array $subsets = [])
+  public function check(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null)
   {
-    list($family, $id, $weight, $style, $variantId) = $this->parseQueryParams($family, $weight, $style);
+    list($family, $id, $weight, $style, $variantId, $subsets) = $this->parseQueryParams($family, $weight, $style, $subsets);
 
     // font not in local database
     if (!isset($this->fonts[$id])) {
       throw (new FontNotAvailableException())
         ->setDistantLoaded($this->distantLoaded)
-        ->setFontData($family, $weight, $style, $variantId);
+        ->setFontData($family, $weight, $style, $variantId, $subsets);
     }
 
     // font variant is not available
     if (false === $this->isAvailable($family, $weight, $style, $subsets)) {
       throw (new VariantNotAvailableException())
-        ->setFontData($family, $weight, $style, $variantId)
+        ->setFontData($family, $weight, $style, $variantId, $subsets)
         ->setAvailableVariants($this->fonts[$id]->getAvailableVariants());
     }
 
@@ -167,7 +167,7 @@ class FontsDb
 
     if (false === $installed) {
       throw (new FontException('Font variant is not installed but is available'))
-        ->setFontData($family, $weight, $style, $variantId);
+        ->setFontData($family, $weight, $style, $variantId, $subsets);
     }
 
     // check the font variant files
@@ -187,7 +187,7 @@ class FontsDb
    * - save the YML files
    * @throws FontException
    */
-  public function install(string $family, string|int|null $weight = null, ?string $style = null, array $subsets = [])
+  public function install(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null)
   {
     // already installed
     try {
@@ -196,12 +196,12 @@ class FontsDb
     } catch (\Throwable $e) {
     }
 
-    list($family, $id, $weight, $style, $variantId) = $this->parseQueryParams($family, $weight, $style);
+    list($family, $id, $weight, $style, $variantId, $subsets) = $this->parseQueryParams($family, $weight, $style, $subsets);
 
     if (!isset($this->fonts[$id]) && true === $this->distantLoaded) {
       throw (new FontNotAvailableException('Font is not available via any provider ..'))
         ->setDistantLoaded(true)
-        ->setFontData($family, $weight, $style, $variantId);
+        ->setFontData($family, $weight, $style, $variantId, $subsets);
     }
 
     $font = $this->fonts[$id];
@@ -209,7 +209,7 @@ class FontsDb
     // local font cannot be installed
     if (true === $font->isLocal()) {
       throw (new FontException('Font is local and cannot be installed ..'))
-        ->setFontData($family, $weight, $style, $variantId);
+        ->setFontData($family, $weight, $style, $variantId, $subsets);
     }
 
     $infos = false;
@@ -223,12 +223,12 @@ class FontsDb
     if (false === $infos) {
       throw (new FontNotAvailableException('Font is not available via any provider ..'))
         ->setDistantLoaded($this->distantLoaded)
-        ->setFontData($family, $weight, $style, $variantId);
+        ->setFontData($family, $weight, $style, $variantId, $subsets);
     }
 
     if (!in_array($variantId, $infos->variants)) {
       throw (new VariantNotAvailableException())
-        ->setFontData($family, $weight, $style, $variantId)
+        ->setFontData($family, $weight, $style, $variantId, $subsets)
         ->setAvailableVariants($this->fonts[$id]->getAvailableVariants());
     }
 
@@ -292,20 +292,20 @@ class FontsDb
    * - font variant properties
    * - font variant format files paths
    */
-  public function get(string $family, string|int|null $weight = null, ?string $style = null, array $subsets = []): object|false
+  public function get(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null): object|false
   {
     if (false === $this->has($family, $weight, $style, $subsets)) {
       return false;
     }
 
-    list($family, $id, $weight, $style, $variantId) = $this->parseQueryParams($family, $weight, $style);
+    list($family, $id, $weight, $style, $variantId, $subsets) = $this->parseQueryParams($family, $weight, $style, $subsets);
 
     return $this->fonts[$id]->toFont($variantId);
   }
 
-  public function has(string $family, string|int|null $weight = null, ?string $style = null, array $subsets = []): bool
+  public function has(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null): bool
   {
-    list($family, $id, $weight, $style) = $this->parseQueryParams($family, $weight, $style);
+    list($family, $id, $weight, $style, $variantId, $subsets) = $this->parseQueryParams($family, $weight, $style, $subsets);
 
     if (!isset($this->fonts[$id])) {
       return false;
@@ -384,7 +384,7 @@ class FontsDb
         $variantData = (object)$variantData;
         $variantData->weight = $variantData->weight ?? '';
         $variantData->style = $variantData->style ?? '';
-        $variantData->family = $font->getFamily();
+        $variantData->family = $variantData->family ?? $font->getFamily();
         unset($variantData->filename);
 
         $variantData->id = (string)$variantData->id;
@@ -487,6 +487,7 @@ class FontsDb
 
     $variant->sets([
       'id' => $variantData->id,
+      'family' => $variantData->family,
       'style' => $variantData->style ?? 'normal',
       'weight' => $variantData->weight ?? '',
       'display' => $variantData->display ?? '',
@@ -524,18 +525,26 @@ class FontsDb
     }
   }
 
-  private function parseQueryParams(string $family, string|int|null $weight = null, ?string $style = null): array
+  private function parseQueryParams(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null): array
   {
-    if (false !== \strpos($family, '/')) {
-      $parts = explode('/', $family);
+    // extract subsets from family
+    if (false !== \strpos($family, '@')) {
+      $parts = explode('@', $family, 2);
       $family = $parts[0];
-      if (!$weight) {
-        $weight = $parts[1];
+      if ('' !== $parts[1]) {
+        $subsets = explode(',', $parts[1]);
       }
     }
 
+    // extract variant from family
+    if (false !== \strpos($family, '/')) {
+      $parts = explode('/', $family, 2);
+      $family = $parts[0];
+      $weight = $parts[1];
+    }
+
     if (null !== $weight) {
-      //$weight = (string)$weight;
+      $weight = (string)$weight;
 
       if ($weight) {
         if (preg_match("/^(.+)italic$/", $weight, $m)) {
@@ -565,18 +574,26 @@ class FontsDb
     }
 
     return [
-      $family,
+      $this->formatFamilyName($family),
       $this->formatFamilyId($family),
       $weight,
       $style,
-      $this->formatVariantId((string)$weight, (string)$style)
+      $this->formatVariantId((string)$weight, (string)$style),
+      $subsets ?? [],
     ];
+  }
+
+  private function formatFamilyName(string $id): string
+  {
+    $name = \str_replace('-', ' ', $id);
+    $name = \ucwords($name);
+    return $name;
   }
 
   private function formatFamilyId(string $name): string
   {
-    $id = str_replace(' ', '-', $name);
-    $id = strtolower($id);
+    $id = \str_replace(' ', '-', $name);
+    $id = \strtolower($id);
     return $id;
   }
 

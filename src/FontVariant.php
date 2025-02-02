@@ -18,6 +18,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class FontVariant implements \JsonSerializable
 {
   private string $id = '';
+  private string $family = '';
   private string $style = 'normal';
   private string $weight = '';
   private string $display = '';
@@ -30,7 +31,7 @@ class FontVariant implements \JsonSerializable
   {
     $data = [];
     $data['id'] = $this->id;
-    // $data['family'] = $this->family;
+    $data['family'] = $this->family;
 
     if ('' !== $this->style) {
       $data['style'] = $this->style;
@@ -147,6 +148,8 @@ class FontVariant implements \JsonSerializable
   public function toFont(): object
   {
     $data = [];
+    $data['id'] = $this->id;
+    $data['family'] = $this->family;
     $data['style'] = $this->style;
     $data['weight'] = $this->weight;
     $data['display'] = $this->display;
@@ -162,6 +165,7 @@ class FontVariant implements \JsonSerializable
   {
     $data = [];
     $data['id'] = $this->id;
+    $data['family'] = $this->family;
     if ($this->style) {
       $data['style'] = $this->style;
     }

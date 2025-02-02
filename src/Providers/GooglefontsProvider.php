@@ -42,7 +42,6 @@ class GooglefontsProvider extends Provider
     }
 
     $response = \json_decode($result);
-
     $items = (array)$response->items;
 
     foreach ($items as $item) {

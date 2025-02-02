@@ -216,7 +216,9 @@ class Font implements \JsonSerializable
   {
     $data = $this->getFontVariant($variantId)->toFont();
     $data->id = $this->id;
-    $data->family = $this->family;
+    if (!$data->family) {
+      $data->family = $this->family;
+    }
     $data->version = $this->version;
     $data->local = $this->local;
     return $data;

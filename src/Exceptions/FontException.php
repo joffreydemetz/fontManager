@@ -16,9 +16,10 @@ class FontException extends \Exception
 {
     protected string $errorMessage = 'Font Error';
     protected string $fontFamily = '';
-    protected ?string $fontWeight = null;
+    protected string|int|null $fontWeight = null;
     protected ?string $fontStyle = null;
     protected ?string $fontVariant = null;
+    protected ?array $fontSubsets = null;
     protected bool $distantLoaded = false;
 
     public function setDistantLoaded(bool $distantLoaded = true)
@@ -31,30 +32,35 @@ class FontException extends \Exception
         string $fontFamily,
         ?string $fontWeight = null,
         ?string $fontStyle = null,
-        ?string $fontVariant = null
+        ?string $fontVariant = null,
+        ?array $fontSubsets = null
     ) {
         $this->fontFamily = $fontFamily;
         $this->fontWeight = $fontWeight;
         $this->fontStyle = $fontStyle;
         $this->fontVariant = $fontVariant;
+        $this->fontSubsets = $fontSubsets;
         return $this;
     }
 
     public function getFontError(): string
     {
         $data = [];
-        $data[] = 'F: ' . $this->fontFamily;
+        $data[] = 'Font: ' . $this->fontFamily;
         if ($this->fontWeight) {
-            $data[] = 'W: ' . $this->fontWeight;
+            $data[] = 'Weight: ' . $this->fontWeight;
         }
         if ($this->fontStyle) {
-            $data[] = 'S: ' . $this->fontStyle;
+            $data[] = 'Style: ' . $this->fontStyle;
         }
         if ($this->fontVariant) {
-            $data[] = 'V: ' . $this->fontVariant;
+            $data[] = 'Variant: ' . $this->fontVariant;
+        }
+        if ($this->fontSubsets) {
+            $data[] = 'Subsets: ' . implode(',', $this->fontSubsets);
         }
         return $this->errorMessage . ' .. '
             . $this->message
-            . ($data ? "\n" . 'Data: ' . implode(' - ', $data) : '');
+            . ($data ? "\n" . implode(' - ', $data) : '');
     }
 }
