@@ -215,6 +215,7 @@ class Font implements \JsonSerializable
   public function toFont(string $variantId): object
   {
     $data = $this->getFontVariant($variantId)->toFont();
+    $data->id = $this->id;
     $data->family = $this->family;
     $data->version = $this->version;
     $data->local = $this->local;
