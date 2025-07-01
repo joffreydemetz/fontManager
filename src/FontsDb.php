@@ -254,6 +254,7 @@ class FontsDb
         // missing files
       }
     } else {
+      $variantData->family = $variantData->family ?? $font->getFamily();
       $fontVariant = $this->createFontVariant($variantData);
     }
 
