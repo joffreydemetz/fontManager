@@ -42,13 +42,13 @@ class FontsDb
     $this->save();
   }
 
-  public function addProvider(Provider $provider)
+  public function addProvider(Provider $provider): self
   {
     $this->providers[] = $provider;
     return $this;
   }
 
-  public function load(bool $prefetch = false)
+  public function load(bool $prefetch = false): self
   {
     if (!\is_dir($this->fontsPath)) {
       throw new \RuntimeException('Fonts folder not found in ' . $this->fontsPath);
@@ -58,10 +58,19 @@ class FontsDb
     $this->loadFromFolder();
 
     if (true === $prefetch) {
-      $this->loadFromProviders();
+      $this->loadDistantFonts(true);
     }
 
-    $this->save();
+    return $this;
+  }
+
+  public function loadDistantFonts(bool $save = false): self
+  {
+    $this->loadFromProviders();
+
+    if (true === $save) {
+      $this->save();
+    }
 
     return $this;
   }
@@ -143,7 +152,7 @@ class FontsDb
    * Check if requested font variant is available and installed
    * @throws  FontException
    */
-  public function check(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null)
+  public function check(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null): void
   {
     list($family, $id, $weight, $style, $variantId, $subsets) = $this->parseQueryParams($family, $weight, $style, $subsets);
 
@@ -187,7 +196,7 @@ class FontsDb
    * - save the YML files
    * @throws FontException
    */
-  public function install(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null)
+  public function install(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null): void
   {
     // already installed
     try {
@@ -319,7 +328,7 @@ class FontsDb
     return true;
   }
 
-  public function save()
+  public function save(): void
   {
     $fonts = [];
     foreach ($this->fonts as $font) {
@@ -345,7 +354,7 @@ class FontsDb
     $this->dumpYaml($this->fontsPath . '/fonts.yml', $fonts);
   }
 
-  private function loadFromYml()
+  private function loadFromYml(): void
   {
     $fonts = (array)$this->getYaml($this->fontsPath . '/fonts.yml');
 
@@ -354,7 +363,7 @@ class FontsDb
     }
   }
 
-  private function loadFromFolder()
+  private function loadFromFolder(): void
   {
     foreach (new \DirectoryIterator($this->fontsPath . '/') as $folderFI) {
       if (true === $folderFI->isDot() || false === $folderFI->isDir()) {
@@ -422,7 +431,7 @@ class FontsDb
     }
   }
 
-  private function loadFromProviders()
+  private function loadFromProviders(): void
   {
     if (true === $this->distantLoaded) {
       return;
@@ -515,7 +524,7 @@ class FontsDb
     return $data;
   }
 
-  private function dumpYaml(string $path, mixed $data, int $maxLevel = 3)
+  private function dumpYaml(string $path, mixed $data, int $maxLevel = 3): void
   {
     try {
       $fs = new Filesystem();

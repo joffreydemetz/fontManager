@@ -20,8 +20,11 @@ class GooglefontsProvider extends Provider
 
   protected string $providerUrl = self::GFONTS_PROVIDER_URL;
 
-  public function __construct(string $googleFontsApiKey)
+  public function __construct(?string $googleFontsApiKey = null)
   {
+    if (null === $googleFontsApiKey) {
+      $googleFontsApiKey = $_ENV['GOOGLE_FONTS_API_KEY'] ?? '';
+    }
     $this->providerUrl .= '?key=' . $googleFontsApiKey;
   }
 
@@ -35,7 +38,6 @@ class GooglefontsProvider extends Provider
     \curl_setopt($ch, \CURLOPT_REFERER, $this->providerUrl);
     \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
     $result = \curl_exec($ch);
-    \curl_close($ch);
 
     if (!$result) {
       throw new \Exception('Error updating font list from ' . $this->providerUrl);
@@ -52,7 +54,7 @@ class GooglefontsProvider extends Provider
     return $items;
   }
 
-  protected function fecthInfos(string $id, string $family): object|false
+  protected function fetchInfos(string $id, string $family): object|false
   {
     $ch = \curl_init();
     \curl_setopt($ch, \CURLOPT_SSL_VERIFYPEER, true);
@@ -62,7 +64,6 @@ class GooglefontsProvider extends Provider
     // \curl_setopt($ch, \CURLOPT_REFERER, $this->googleFontsUrl);
     \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
     $result = \curl_exec($ch);
-    \curl_close($ch);
 
     if (!$result) {
       return false;

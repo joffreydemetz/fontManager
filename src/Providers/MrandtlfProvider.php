@@ -30,7 +30,6 @@ class MrandtlfProvider extends Provider
     \curl_setopt($ch, \CURLOPT_REFERER, $this->providerUrl);
     \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
     $result = \curl_exec($ch);
-    \curl_close($ch);
 
     if (!$result) {
       throw new \Exception('Error updating font list from ' . $this->providerUrl);
@@ -41,13 +40,12 @@ class MrandtlfProvider extends Provider
     return (array)$response;
   }
 
-  protected function fecthInfos(string $id, string $family): object|false
+  protected function fetchInfos(string $id, string $family): object|false
   {
     $ch = \curl_init();
     \curl_setopt($ch, \CURLOPT_URL, $this->providerUrl . '/' . $id);
     \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
     $result = \curl_exec($ch);
-    \curl_close($ch);
 
     if (!$result) {
       return false;
