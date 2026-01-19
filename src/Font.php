@@ -71,7 +71,7 @@ class Font implements \JsonSerializable
     return $data;
   }
 
-  public function setBasePath(string $path)
+  public function setBasePath(string $path): self
   {
     $path = rtrim($path, '/');
     $this->basePath = $path;
@@ -94,7 +94,7 @@ class Font implements \JsonSerializable
     return $this->installed;
   }
 
-  public function sets(array $data)
+  public function sets(array $data): self
   {
     foreach ($data as $key => $value) {
       if (\property_exists($this, $key)) {
@@ -137,7 +137,7 @@ class Font implements \JsonSerializable
     return \array_keys($this->fontVariants);
   }
 
-  public function checkId()
+  public function checkId(): self
   {
     if ('' === $this->id && '' !== $this->family) {
       $this->id = str_replace(' ', '-', $this->family);
@@ -147,7 +147,7 @@ class Font implements \JsonSerializable
     return $this;
   }
 
-  public function checkAvailableSubsets(array $subsets)
+  public function checkAvailableSubsets(array $subsets): void
   {
     // no subsets .. could be glyphs or icons in the font
     if (empty($this->subsets)) {
@@ -161,7 +161,7 @@ class Font implements \JsonSerializable
     }
   }
 
-  public function addVariant(string $id)
+  public function addVariant(string $id): self
   {
     if (!in_array($id, $this->variants)) {
       $this->variants[] = $id;
@@ -174,7 +174,7 @@ class Font implements \JsonSerializable
     return in_array($id, $this->variants);
   }
 
-  public function addFontVariant(FontVariant $fontVariant)
+  public function addFontVariant(FontVariant $fontVariant): self
   {
     $fontVariant->setBasePath($this->getPath());
 

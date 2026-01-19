@@ -56,7 +56,7 @@ class FontVariant implements \JsonSerializable
     return $data;
   }
 
-  public function setBasePath(string $path)
+  public function setBasePath(string $path): self
   {
     $this->basePath = $path;
     return $this;
@@ -80,7 +80,7 @@ class FontVariant implements \JsonSerializable
     return $this->files;
   }
 
-  public function sets(array $data)
+  public function sets(array $data): self
   {
     foreach ($data as $key => $value) {
       if (\property_exists($this, $key)) {
@@ -105,7 +105,7 @@ class FontVariant implements \JsonSerializable
     return isset($this->files[$ext]);
   }
 
-  public function addFile(string $ext, string $filename)
+  public function addFile(string $ext, string $filename): self
   {
     $this->files[$ext] = $filename;
     return $this;
@@ -118,7 +118,7 @@ class FontVariant implements \JsonSerializable
    * - create the woff2 file if missing
    * - check if all required formats are present
    */
-  public function check(string $fontId, array $formats, array $subsets = [])
+  public function check(string $fontId, array $formats, array $subsets = []): void
   {
     if (false === $this->hasFile('ttf')) {
       throw new FontException('Missing TTF file');
@@ -224,7 +224,6 @@ class FontVariant implements \JsonSerializable
     $code = null;
     \exec(implode(' ', $cmd), $output, $code);
 
-    //$debug = \ob_get_clean();
     \ob_end_clean();
 
     if (\file_exists($targetPath)) {
