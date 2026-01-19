@@ -20,8 +20,11 @@ class GooglefontsProvider extends Provider
 
   protected string $providerUrl = self::GFONTS_PROVIDER_URL;
 
-  public function __construct(string $googleFontsApiKey)
+  public function __construct(?string $googleFontsApiKey = null)
   {
+    if (null === $googleFontsApiKey) {
+      $googleFontsApiKey = $_ENV['GOOGLE_FONTS_API_KEY'] ?? '';
+    }
     $this->providerUrl .= '?key=' . $googleFontsApiKey;
   }
 

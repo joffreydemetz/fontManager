@@ -2,3 +2,4 @@ composer.lock
 /examples/fonts/*/
 /examples/fonts/fonts.yml
 /vendor/
+.env
