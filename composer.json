@@ -20,14 +20,30 @@
     ],
     "require": {
         "php": ">=8.2",
+        "ext-curl": "*",
         "symfony/yaml": "^7.4",
         "symfony/filesystem": "^7.4",
-        "symfony/dotenv": "^7.4",
         "tecnickcom/tc-lib-pdf-font": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "symfony/dotenv": "^7.4"
+    },
+    "suggest": {
+        "ext-curl": "To fetch remote font files",
+        "symfony/dotenv": "To manage environment variables"
     },
     "autoload": {
         "psr-4": {
             "JDZ\\FontManager\\": "src"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JDZ\\FontManager\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --colors=always"
     }
 }
