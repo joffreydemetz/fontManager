@@ -35,7 +35,6 @@ class GooglefontsProvider extends Provider
     \curl_setopt($ch, \CURLOPT_REFERER, $this->providerUrl);
     \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
     $result = \curl_exec($ch);
-    \curl_close($ch);
 
     if (!$result) {
       throw new \Exception('Error updating font list from ' . $this->providerUrl);
@@ -62,7 +61,6 @@ class GooglefontsProvider extends Provider
     // \curl_setopt($ch, \CURLOPT_REFERER, $this->googleFontsUrl);
     \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
     $result = \curl_exec($ch);
-    \curl_close($ch);
 
     if (!$result) {
       return false;
