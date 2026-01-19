@@ -14,7 +14,7 @@ use JDZ\FontManager\Providers\ProviderInterface;
 /**
  * @author  Joffrey Demetz <joffrey.demetz@gmail.com>
  */
-class Provider implements ProviderInterface
+abstract class Provider implements ProviderInterface
 {
   protected string $providerUrl;
 
@@ -37,15 +37,9 @@ class Provider implements ProviderInterface
     return $this->formatFont($data);
   }
 
-  protected function fetchList(): array
-  {
-    return [];
-  }
+  abstract protected function fetchList(): array;
 
-  protected function fetchInfos(string $id, string $family): object|false
-  {
-    return false;
-  }
+  abstract protected function fetchInfos(string $id, string $family): object|false;
 
   protected function getFont(array $fontData): object
   {
@@ -65,7 +59,6 @@ class Provider implements ProviderInterface
 
   protected function formatFont(object $data): object
   {
-    //d($data);
     $font = new \stdClass;
     $font->id = $data->id;
     $font->family = $data->family;
