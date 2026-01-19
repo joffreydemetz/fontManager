@@ -17,7 +17,6 @@ use JDZ\FontManager\Exceptions\VariantNotAvailableException;
 use JDZ\FontManager\Providers\Provider;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Dotenv\Dotenv;
 
 /**
  * @author  Joffrey Demetz <joffrey.demetz@gmail.com>
@@ -36,9 +35,6 @@ class FontsDb
     $this->fontsPath = rtrim($fontsPath, '/');
 
     $this->formats = $formats;
-
-    $dotenv = new Dotenv();
-    $dotenv->loadEnv(__DIR__ . '/../../.env');
   }
 
   public function __destruct()
@@ -62,10 +58,19 @@ class FontsDb
     $this->loadFromFolder();
 
     if (true === $prefetch) {
-      $this->loadFromProviders();
+      $this->loadDistantFonts(true);
     }
 
-    $this->save();
+    return $this;
+  }
+
+  public function loadDistantFonts(bool $save = false): self
+  {
+    $this->loadFromProviders();
+
+    if (true === $save) {
+      $this->save();
+    }
 
     return $this;
   }

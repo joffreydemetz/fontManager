@@ -4,14 +4,17 @@ require_once realpath(__DIR__ . '/../vendor/autoload.php');
 
 use JDZ\FontManager\FontsDb;
 use JDZ\FontManager\Exceptions\FontException;
+use Symfony\Component\Dotenv\Dotenv;
 
-$googleFontsApiKey = ''; // ENTER YOUR GOOGLE FONT API KEY HERE
 $subsets = ['latin', 'latin-ext'];
 $formats = ['ttf', 'woff2', 'woff'];
 
 if (!\is_dir(__DIR__ . '/fonts/')) {
     \mkdir(__DIR__ . '/fonts/', 0777, true);
 }
+
+$dotenv = new Dotenv();
+$dotenv->loadEnv(realpath(__DIR__ . '/../.env'));
 
 function d($data, bool $exit = true)
 {
@@ -85,9 +88,7 @@ try {
     );
 
     $fontsDb->addProvider(new \JDZ\FontManager\Providers\MrandtlfProvider());
-    if ($googleFontsApiKey) {
-        $fontsDb->addProvider(new \JDZ\FontManager\Providers\GooglefontsProvider($googleFontsApiKey));
-    }
+    $fontsDb->addProvider(new \JDZ\FontManager\Providers\GooglefontsProvider());
 
     echo '***** ' . "\n";
     echo 'Without PREFETCH' . "\n";
@@ -110,7 +111,7 @@ try {
 
     echo '***** ' . "\n";
     echo 'With PREFETCH' . "\n";
-    $fontsDb->load(true);
+    $fontsDb->loadDistantFonts();
     echo '***** ' . "\n\n";
     echo 'Check fonts' . "\n\n";
     check($fontsDb, 'afcdp-font');
