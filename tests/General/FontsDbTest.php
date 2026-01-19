@@ -67,7 +67,8 @@ class FontsDbTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Fonts folder not found');
 
-        $db = new FontsDb('/non/existent/path');
+        $nonExistentPath = sys_get_temp_dir() . '/non-existent-path-' . uniqid();
+        $db = new FontsDb($nonExistentPath);
         $db->load();
     }
 

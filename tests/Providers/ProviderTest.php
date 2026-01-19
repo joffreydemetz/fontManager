@@ -9,7 +9,9 @@ class ProviderTest extends TestCase
 {
     public function testProviderCanBeMocked(): void
     {
-        $provider = $this->getMockForAbstractClass(Provider::class);
+        $provider = $this->getMockBuilder(Provider::class)
+            ->onlyMethods(['fetchList', 'fetchInfos'])
+            ->getMock();
 
         $this->assertInstanceOf(Provider::class, $provider);
     }
@@ -49,7 +51,12 @@ class ProviderTest extends TestCase
     {
         $mockData = (object)[
             'id' => 'test-font',
-            'family' => 'Test Font'
+            'family' => 'Test Font',
+            'version' => 'v1.0',
+            'lastModified' => '2026-01-01',
+            'category' => 'sans-serif',
+            'variants' => ['regular'],
+            'subsets' => ['latin']
         ];
 
         $provider = $this->getMockBuilder(Provider::class)
@@ -64,5 +71,7 @@ class ProviderTest extends TestCase
         $result = $provider->infos('test-font', 'Test Font');
 
         $this->assertIsObject($result);
+        $this->assertEquals('test-font', $result->id);
+        $this->assertEquals('Test Font', $result->family);
     }
 }
