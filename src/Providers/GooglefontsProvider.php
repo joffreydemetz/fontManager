@@ -52,7 +52,7 @@ class GooglefontsProvider extends Provider
     return $items;
   }
 
-  protected function fecthInfos(string $id, string $family): object|false
+  protected function fetchInfos(string $id, string $family): object|false
   {
     $ch = \curl_init();
     \curl_setopt($ch, \CURLOPT_SSL_VERIFYPEER, true);

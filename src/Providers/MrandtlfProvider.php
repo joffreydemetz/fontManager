@@ -41,7 +41,7 @@ class MrandtlfProvider extends Provider
     return (array)$response;
   }
 
-  protected function fecthInfos(string $id, string $family): object|false
+  protected function fetchInfos(string $id, string $family): object|false
   {
     $ch = \curl_init();
     \curl_setopt($ch, \CURLOPT_URL, $this->providerUrl . '/' . $id);

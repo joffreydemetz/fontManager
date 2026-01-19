@@ -30,7 +30,7 @@ class Provider implements ProviderInterface
 
   public function infos(string $id, string $family): object|false
   {
-    if (false === ($data = $this->fecthInfos($id, $family))) {
+    if (false === ($data = $this->fetchInfos($id, $family))) {
       return false;
     }
 
@@ -42,7 +42,7 @@ class Provider implements ProviderInterface
     return [];
   }
 
-  protected function fecthInfos(string $id, string $family): object|false
+  protected function fetchInfos(string $id, string $family): object|false
   {
     return false;
   }
