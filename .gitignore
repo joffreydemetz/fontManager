@@ -4,3 +4,4 @@ composer.lock
 /examples/fonts/fonts.yml
 /vendor/
 /.phpunit.cache/
+/coverage/
