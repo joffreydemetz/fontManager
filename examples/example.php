@@ -95,7 +95,7 @@ try {
     $fontsDb->load();
     echo '***** ' . "\n\n";
     echo 'Check fonts' . "\n\n";
-    check($fontsDb, 'afcdp-font');
+    check($fontsDb, 'Custom Font');
     check($fontsDb, 'Toto Font');
     check($fontsDb, 'Roboto', 'extralight', null, $subsets);
     check($fontsDb, 'Roboto/regular@' . implode(',', $subsets));
@@ -114,7 +114,7 @@ try {
     $fontsDb->loadDistantFonts();
     echo '***** ' . "\n\n";
     echo 'Check fonts' . "\n\n";
-    check($fontsDb, 'afcdp-font');
+    check($fontsDb, 'Custom Font');
     check($fontsDb, 'Toto Font');
     check($fontsDb, 'Roboto', 'extralight', null, $subsets);
     check($fontsDb, 'Roboto', '550', 'italic', $subsets);
@@ -124,7 +124,7 @@ try {
 
     echo '***** ' . "\n\n";
     echo 'Install fonts (prefetch)' . "\n\n";
-    install($fontsDb, 'afcdp-font');
+    install($fontsDb, 'Custom Font');
     install($fontsDb, 'Toto Font');
     install($fontsDb, 'Roboto', 'extralight', null, $subsets);
     install($fontsDb, 'Roboto@' . implode(',', $subsets));
@@ -142,7 +142,7 @@ try {
 
     echo '***** ' . "\n\n";
     echo 'Get font data (prefetch)' . "\n\n";
-    get($fontsDb, 'afcdp-font');
+    get($fontsDb, 'Custom Font');
     get($fontsDb, 'Roboto', 'extralight', null, $subsets);
     get($fontsDb, 'Montserrat/550italic@' . implode(',', $subsets));
     get($fontsDb, 'Montserrat', 600, null, $subsets);
