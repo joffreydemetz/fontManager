@@ -94,4 +94,18 @@ class FontsDbTest extends TestCase
 
         $this->assertSame($db, $result);
     }
+
+    public function testInstallUnknownFontWithoutDistantLoadThrows(): void
+    {
+        file_put_contents($this->testFontsPath . '/fonts.yml', '[]');
+
+        $db = new FontsDb($this->testFontsPath);
+        $db->load();
+
+        // no loadDistantFonts() call: install() must ask the providers itself
+        // and report the font as unavailable, not read an undefined key
+        $this->expectException(\JDZ\FontManager\Exceptions\FontNotAvailableException::class);
+
+        $db->install('No Such Family', 400, 'normal');
+    }
 }

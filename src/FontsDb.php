@@ -207,7 +207,13 @@ class FontsDb
 
     list($family, $id, $weight, $style, $variantId, $subsets) = $this->parseQueryParams($family, $weight, $style, $subsets);
 
-    if (!isset($this->fonts[$id]) && true === $this->distantLoaded) {
+    // unknown locally: ask the providers once before giving up (a caller that
+    // never ran loadDistantFonts() used to hit an undefined key here)
+    if (!isset($this->fonts[$id]) && false === $this->distantLoaded) {
+      $this->loadDistantFonts();
+    }
+
+    if (!isset($this->fonts[$id])) {
       throw (new FontNotAvailableException('Font is not available via any provider ..'))
         ->setDistantLoaded(true)
         ->setFontData($family, $weight, $style, $variantId, $subsets);

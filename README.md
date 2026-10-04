@@ -22,7 +22,6 @@ composer require jdz/fontmanager
 - `ext-curl` (fetching font lists and files from the providers)
 - `symfony/yaml` ^7.4
 - `symfony/filesystem` ^7.4
-- `tecnickcom/tc-lib-pdf-font` ^2.0
 - Python with *fonttools* — the WOFF / WOFF2 conversion shells out to `pyftsubset`, which must be on the `PATH`:
 
 ```bash
@@ -128,6 +127,7 @@ composer test
 
 ## Changelog
 
+- **2.1.1** — `install()` on a font unknown locally loads the provider catalogs itself and throws `FontNotAvailableException` instead of failing on an undefined key; the unused `tecnickcom/tc-lib-pdf-font` requirement is dropped.
 - **2.1.0** — Example uses a generic custom font name.
 - **2.0.2** — Test coverage configuration.
 - **2.0.1** — PHPUnit 11.
