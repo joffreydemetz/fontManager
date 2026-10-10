@@ -7,16 +7,21 @@ use JDZ\FontManager\Providers\GooglefontsProvider;
 
 class GooglefontsProviderTest extends TestCase
 {
-    private string $originalApiKey;
+    // GooglefontsProvider reads $_ENV, not getenv(): putenv() would change nothing
+    private ?string $originalApiKey;
 
     protected function setUp(): void
     {
-        $this->originalApiKey = getenv('GOOGLE_FONTS_API_KEY') ?: '';
+        $this->originalApiKey = $_ENV['GOOGLE_FONTS_API_KEY'] ?? null;
     }
 
     protected function tearDown(): void
     {
-        putenv('GOOGLE_FONTS_API_KEY=' . $this->originalApiKey);
+        if (null === $this->originalApiKey) {
+            unset($_ENV['GOOGLE_FONTS_API_KEY']);
+        } else {
+            $_ENV['GOOGLE_FONTS_API_KEY'] = $this->originalApiKey;
+        }
     }
 
     public function testGooglefontsProviderCanBeInstantiated(): void
@@ -36,7 +41,7 @@ class GooglefontsProviderTest extends TestCase
 
     public function testGooglefontsProviderUsesEnvironmentVariable(): void
     {
-        putenv('GOOGLE_FONTS_API_KEY=env-test-key');
+        $_ENV['GOOGLE_FONTS_API_KEY'] = 'env-test-key';
 
         $provider = new GooglefontsProvider();
 
@@ -45,7 +50,7 @@ class GooglefontsProviderTest extends TestCase
 
     public function testGooglefontsProviderWithNoApiKey(): void
     {
-        putenv('GOOGLE_FONTS_API_KEY=');
+        $_ENV['GOOGLE_FONTS_API_KEY'] = '';
 
         $provider = new GooglefontsProvider();
 

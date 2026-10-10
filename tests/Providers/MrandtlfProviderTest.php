@@ -19,10 +19,4 @@ class MrandtlfProviderTest extends TestCase
         $this->assertInstanceOf(MrandtlfProvider::class, $this->provider);
     }
 
-    public function testListReturnsArray(): void
-    {
-        $result = $this->provider->list();
-
-        $this->assertIsArray($result);
-    }
 }

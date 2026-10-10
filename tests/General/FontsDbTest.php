@@ -64,12 +64,18 @@ class FontsDbTest extends TestCase
 
     public function testLoadThrowsExceptionWhenFontsPathNotExists(): void
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Fonts folder not found');
+        $db = new FontsDb($this->testFontsPath . '/missing');
 
-        $nonExistentPath = sys_get_temp_dir() . '/non-existent-path-' . uniqid();
-        $db = new FontsDb($nonExistentPath);
-        $db->load();
+        try {
+            $db->load();
+            $this->fail('load() should throw on a missing fonts folder');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('Fonts folder not found', $e->getMessage());
+        }
+
+        // FontsDb::__destruct() saves even after a failed load(): destroy it now, so
+        // what it writes lands inside the test's temp dir, which tearDown() removes
+        unset($db);
     }
 
     public function testLoadSucceedsWithExistingPath(): void
