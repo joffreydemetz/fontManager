@@ -126,14 +126,17 @@ class FontVariant implements \JsonSerializable
 
     $filename = $fontId . '-' . $this->getId();
 
+    // a format counts only once converted (a failed conversion used to be recorded anyway)
     if (false === $this->hasFile('woff') && in_array('woff', $formats)) {
-      $this->ttf2woff($this->getPath() . '/' . $this->getFile('ttf'), $this->getPath() . '/' . $filename . '.woff', $this->subsetsUnicodes($subsets), 'woff');
-      $this->addFile('woff', $filename . '.woff');
+      if ($this->ttf2woff($this->getPath() . '/' . $this->getFile('ttf'), $this->getPath() . '/' . $filename . '.woff', $this->subsetsUnicodes($subsets), 'woff')) {
+        $this->addFile('woff', $filename . '.woff');
+      }
     }
 
     if (false === $this->hasFile('woff2') && in_array('woff2', $formats)) {
-      $this->ttf2woff($this->getPath() . '/' . $this->getFile('ttf'), $this->getPath() . '/' . $filename . '.woff2', $this->subsetsUnicodes($subsets), 'woff2');
-      $this->addFile('woff2', $filename . '.woff2');
+      if ($this->ttf2woff($this->getPath() . '/' . $this->getFile('ttf'), $this->getPath() . '/' . $filename . '.woff2', $this->subsetsUnicodes($subsets), 'woff2')) {
+        $this->addFile('woff2', $filename . '.woff2');
+      }
     }
 
     foreach ($formats as $format) {
@@ -180,53 +183,57 @@ class FontVariant implements \JsonSerializable
 
   private function subsetsUnicodes(array $subsets): string
   {
-    $range = '';
+    // ranges joined with ", " (they used to run together, and cyrillic lacked its
+    // "U"); no known subset keeps every glyph (an empty --unicodes kept none)
+    $ranges = [];
     foreach ($subsets as $subset) {
       switch ($subset) {
         case 'cyrillic-ext':
-          $range .= "U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F";
+          $ranges[] = "U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F";
           break;
         case 'cyrillic':
-          $range .= "+0400-045F, U+0490-0491, U+04B0-04B1, U+2116";
+          $ranges[] = "U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116";
           break;
         case 'greek-ext':
-          $range .= "U+1F00-1FFF";
+          $ranges[] = "U+1F00-1FFF";
           break;
         case 'greek':
-          $range .= "U+0370-03FF";
+          $ranges[] = "U+0370-03FF";
           break;
         case 'latin-ext':
-          $range .= "U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF";
+          $ranges[] = "U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF";
           break;
         case 'latin':
-          $range .= "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD";
+          $ranges[] = "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD";
           break;
       }
     }
-    return $range;
+
+    return $ranges ? implode(', ', $ranges) : '*';
   }
 
-  private function ttf2woff(string $ttfPath, string $targetPath, string $range, string $flavor): bool
+  /**
+   * The pyftsubset conversion (protected so a test can stand in for it). Every
+   * argument is shell-quoted (a path with a space broke the command) and the
+   * tool's stderr is captured with its output instead of reaching the console.
+   */
+  protected function ttf2woff(string $ttfPath, string $targetPath, string $range, string $flavor): bool
   {
-    \ob_start();
-
     $cmd = [
       'pyftsubset',
       $ttfPath,
       '--output-file=' . $targetPath,
       '--flavor=' . $flavor,
-      '--layout-features="*"',
+      '--layout-features=*',
       '--with-zopfli',
-      '--unicodes="' . $range . '"',
+      '--unicodes=' . $range,
     ];
 
     $output = null;
     $code = null;
-    \exec(implode(' ', $cmd), $output, $code);
+    \exec(implode(' ', array_map('escapeshellarg', $cmd)) . ' 2>&1', $output, $code);
 
-    \ob_end_clean();
-
-    if (\file_exists($targetPath)) {
+    if (0 === $code && \file_exists($targetPath)) {
       $fs = new Filesystem();
       $fs->chmod($targetPath, 0755);
       return true;

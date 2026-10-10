@@ -145,4 +145,65 @@ class FontVariantTest extends TestCase
 
         $this->fail('Expected an exception, none was thrown');
     }
+
+    // --- conversions (ttf2woff() recorded, pyftsubset never runs) ---
+
+    private const LATIN = 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD';
+
+    /** a variant with a ttf whose conversions are recorded and succeed or fail */
+    private static function converting(bool $succeeds): FontVariant
+    {
+        $variant = new class($succeeds) extends FontVariant {
+            public array $conversions = [];
+
+            public function __construct(private bool $succeeds) {}
+
+            protected function ttf2woff(string $ttfPath, string $targetPath, string $range, string $flavor): bool
+            {
+                $this->conversions[] = [basename($targetPath), $range, $flavor];
+
+                return $this->succeeds;
+            }
+        };
+        $variant->setBasePath('/fonts')->sets(['id' => 'regular'])->addFile('ttf', 'open-sans-regular.ttf');
+
+        return $variant;
+    }
+
+    public static function subsetRanges(): array
+    {
+        return [
+            'no subset keeps every glyph' => [[], '*'],
+            'latin' => [['latin'], self::LATIN],
+            // cyrillic lacked its "U" and the ranges were joined with no separator
+            'latin and cyrillic' => [['latin', 'cyrillic'], self::LATIN . ', U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116'],
+        ];
+    }
+
+    #[DataProvider('subsetRanges')]
+    public function testConversionsKeepTheUnicodeRangesOfTheSubsets(array $subsets, string $range): void
+    {
+        $variant = self::converting(true);
+
+        $variant->check('open-sans', ['ttf', 'woff2', 'woff'], $subsets);
+
+        $this->assertSame([['open-sans-regular.woff', $range, 'woff'], ['open-sans-regular.woff2', $range, 'woff2']], $variant->conversions);
+        $this->assertSame(['ttf' => 'open-sans-regular.ttf', 'woff' => 'open-sans-regular.woff', 'woff2' => 'open-sans-regular.woff2'], $variant->getFiles());
+        $this->assertTrue($variant->isInstalled());
+    }
+
+    /**
+     * A failed conversion used to be recorded as a file anyway, and the variant
+     * marked installed.
+     */
+    public function testAFailedConversionLeavesTheFormatMissing(): void
+    {
+        $variant = self::converting(false);
+
+        $e = $this->thrownBy(fn() => $variant->check('open-sans', ['ttf', 'woff']));
+
+        $this->assertSame([FontException::class, 'Missing woff format file'], [$e::class, $e->getMessage()]);
+        $this->assertSame(['ttf' => 'open-sans-regular.ttf'], $variant->getFiles());
+        $this->assertFalse($variant->isInstalled());
+    }
 }
