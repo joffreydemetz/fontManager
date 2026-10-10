@@ -1,0 +1,36 @@
+{
+  "kind": "webfonts#webfontList",
+  "items": [
+    {
+      "family": "Open Sans",
+      "variants": ["300", "regular", "italic", "700", "700italic"],
+      "subsets": ["cyrillic", "greek", "latin", "latin-ext"],
+      "version": "v40",
+      "lastModified": "2024-05-01",
+      "files": {
+        "300": "https://fonts.gstatic.com/s/opensans/v40/open-sans-300.ttf",
+        "regular": "https://fonts.gstatic.com/s/opensans/v40/open-sans-regular.ttf",
+        "italic": "https://fonts.gstatic.com/s/opensans/v40/open-sans-italic.ttf",
+        "700": "https://fonts.gstatic.com/s/opensans/v40/open-sans-700.ttf",
+        "700italic": "https://fonts.gstatic.com/s/opensans/v40/open-sans-700italic.ttf"
+      },
+      "category": "sans-serif",
+      "kind": "webfonts#webfont",
+      "menu": "https://fonts.gstatic.com/s/opensans/v40/open-sans-menu.ttf"
+    },
+    {
+      "family": "Roboto Mono",
+      "variants": ["regular", "700"],
+      "subsets": ["latin"],
+      "version": "v23",
+      "lastModified": "2024-02-29",
+      "files": {
+        "regular": "https://fonts.gstatic.com/s/robotomono/v23/roboto-mono-regular.ttf",
+        "700": "https://fonts.gstatic.com/s/robotomono/v23/roboto-mono-700.ttf"
+      },
+      "category": "monospace",
+      "kind": "webfonts#webfont",
+      "menu": "https://fonts.gstatic.com/s/robotomono/v23/roboto-mono-menu.ttf"
+    }
+  ]
+}

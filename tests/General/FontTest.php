@@ -2,103 +2,201 @@
 
 namespace JDZ\FontManager\Tests\General;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use JDZ\FontManager\Font;
+use JDZ\FontManager\FontVariant;
+use JDZ\FontManager\Exceptions\VariantNotAvailableException;
 
 class FontTest extends TestCase
 {
-    private Font $font;
-
-    protected function setUp(): void
+    #[DataProvider('ids')]
+    public function testGetIdDerivesTheIdFromTheFamily(array $data, string $id): void
     {
-        $this->font = new Font();
+        $this->assertSame($id, (new Font())->sets($data)->getId());
     }
 
-    public function testFontCanBeInstantiated(): void
+    public static function ids(): array
     {
-        $this->assertInstanceOf(Font::class, $this->font);
+        return [
+            'family name' => [['family' => 'Open Sans'], 'open-sans'],
+            'mixed-case family name' => [['family' => 'PT Sans Narrow'], 'pt-sans-narrow'],
+            'explicit id wins' => [['id' => 'custom-id', 'family' => 'Open Sans'], 'custom-id'],
+        ];
     }
 
-    public function testSetBasePath(): void
+    public function testGetPathJoinsTheTrimmedBasePathAndTheId(): void
     {
-        $path = '/path/to/fonts';
-        $result = $this->font->setBasePath($path);
+        $font = (new Font())->sets(['id' => 'roboto'])->setBasePath('/fonts/');
 
-        $this->assertSame($this->font, $result);
+        $this->assertSame('/fonts/roboto', $font->getPath());
     }
 
-    public function testJsonSerialize(): void
+    public function testJsonSerializeLeavesOutEmptyFields(): void
     {
-        $data = $this->font->jsonSerialize();
-
-        $this->assertIsArray($data);
-        $this->assertArrayHasKey('id', $data);
-        $this->assertArrayHasKey('family', $data);
+        $this->assertSame(['id' => '', 'family' => ''], (new Font())->jsonSerialize());
     }
 
-    public function testSetsId(): void
+    public function testJsonEncodeNestsTheFontVariants(): void
     {
-        $this->font->sets(['id' => 'test-font']);
-        $data = $this->font->jsonSerialize();
+        $font = (new Font())->sets([
+            'id' => 'roboto',
+            'family' => 'Roboto',
+            'category' => 'sans-serif',
+            'version' => 'v47',
+            'lastModified' => '2025-01-08',
+            'subsets' => ['latin'],
+            'variants' => ['regular'],
+        ]);
+        $font->isLocal(true);
+        $font->isInstalled(true);
+        $font->addFontVariant((new FontVariant())->sets(['id' => '700', 'family' => 'Roboto', 'weight' => '700']));
 
-        $this->assertEquals('test-font', $data['id']);
+        $this->assertSame(
+            '{"id":"roboto","family":"Roboto","category":"sans-serif","version":"v47","lastModified":"2025-01-08","local":true,"installed":true,'
+                . '"subsets":["latin"],"variants":["regular","700"],"fontVariants":{"700":{"id":"700","family":"Roboto","style":"normal","weight":"700"}}}',
+            json_encode($font)
+        );
     }
 
-    public function testSetsFamily(): void
+    #[DataProvider('availableSubsets')]
+    public function testCheckAvailableSubsetsAccepts(array $fontSubsets, array $requested): void
     {
-        $this->font->sets(['family' => 'Test Font']);
-        $data = $this->font->jsonSerialize();
+        $font = (new Font())->sets(['subsets' => $fontSubsets]);
 
-        $this->assertEquals('Test Font', $data['family']);
+        $this->expectNotToPerformAssertions();
+
+        $font->checkAvailableSubsets($requested);
     }
 
-    public function testSetsCategory(): void
+    public static function availableSubsets(): array
     {
-        $this->font->sets(['category' => 'sans-serif']);
-        $data = $this->font->jsonSerialize();
-
-        $this->assertEquals('sans-serif', $data['category']);
+        return [
+            'font without subsets (glyphs, icons)' => [[], ['cyrillic']],
+            'declared subsets' => [['latin', 'latin-ext'], ['latin-ext', 'latin']],
+            'no subset requested' => [['latin'], []],
+        ];
     }
 
-    public function testSetsVersion(): void
+    public function testCheckAvailableSubsetsNamesTheFirstMissingSubset(): void
     {
-        $this->font->sets(['version' => 'v1.0']);
-        $data = $this->font->jsonSerialize();
+        $font = (new Font())->sets(['subsets' => ['latin', 'latin-ext']]);
 
-        $this->assertEquals('v1.0', $data['version']);
+        $e = $this->thrownBy(fn() => $font->checkAvailableSubsets(['latin', 'cyrillic', 'greek']));
+
+        $this->assertSame([\Exception::class, 'Subset cyrillic is not available'], [$e::class, $e->getMessage()]);
     }
 
-    public function testIsLocal(): void
+    public function testAddVariantKeepsEachVariantOnce(): void
     {
-        $this->font->isLocal(true);
-        $data = $this->font->jsonSerialize();
+        $font = (new Font())->sets(['variants' => [2 => 'regular']]);
 
-        $this->assertTrue($data['local']);
+        $font->addVariant('700')->addVariant('regular');
+
+        $this->assertSame(
+            [['regular', '700'], true, false],
+            [$font->getAvailableVariants(), $font->hasVariant('700'), $font->hasVariant('900')]
+        );
     }
 
-    public function testIsInstalled(): void
+    public function testAddFontVariantDeclaresAndRebasesTheVariant(): void
     {
-        $this->font->isInstalled(true);
-        $data = $this->font->jsonSerialize();
+        $font = (new Font())->sets(['id' => 'roboto', 'family' => 'Roboto'])->setBasePath('/fonts');
+        $variant = (new FontVariant())->sets(['id' => '700italic']);
 
-        $this->assertTrue($data['installed']);
+        $font->addFontVariant($variant);
+
+        $this->assertSame(
+            [['700italic'], ['700italic'], '/fonts/roboto/700italic', true, $variant],
+            [$font->getAvailableVariants(), $font->getInstalledVariants(), $variant->getPath(), $font->hasFontVariant('700italic'), $font->getFontVariant('700italic')]
+        );
     }
 
-    public function testSetsSubsets(): void
+    public function testHasFontVariantsCountsOnlyInstalledVariants(): void
     {
-        $subsets = ['latin', 'latin-ext'];
-        $this->font->sets(['subsets' => $subsets]);
-        $data = $this->font->jsonSerialize();
+        $font = new Font();
+        $variant = (new FontVariant())->sets(['id' => 'regular']);
+        $font->addFontVariant($variant);
+        $before = $font->hasFontVariants();
 
-        $this->assertEquals($subsets, $data['subsets']);
+        $variant->isInstalled(true);
+
+        $this->assertSame([false, true], [$before, $font->hasFontVariants()]);
     }
 
-    public function testSetsVariants(): void
+    public function testGetFontVariantThrowsForAVariantWithoutFiles(): void
     {
-        $variants = ['regular', 'italic', '700'];
-        $this->font->sets(['variants' => $variants]);
-        $data = $this->font->jsonSerialize();
+        $font = (new Font())->sets(['family' => 'Roboto', 'variants' => ['regular', '700']]);
 
-        $this->assertEquals($variants, $data['variants']);
+        $e = $this->thrownBy(fn() => $font->getFontVariant('900'));
+
+        $this->assertSame(
+            [VariantNotAvailableException::class, '', "Font variant not available .. \nFont: Roboto - Variant: 900\nAvailable variants: regular, 700"],
+            [$e::class, $e->getMessage(), $e->getFontError()]
+        );
+    }
+
+    #[DataProvider('variantFamilies')]
+    public function testToFontMergesFontAndVariantData(string $variantFamily, string $family): void
+    {
+        $font = (new Font())->sets(['id' => 'roboto', 'family' => 'Roboto', 'version' => 'v47'])->setBasePath('/fonts');
+        $font->isLocal(true);
+        $font->addFontVariant(
+            (new FontVariant())
+                ->sets(['id' => '700', 'family' => $variantFamily, 'weight' => '700', 'display' => 'swap'])
+                ->addFile('ttf', 'roboto-700.ttf')
+        );
+
+        $this->assertSame(
+            [
+                'id' => 'roboto',
+                'family' => $family,
+                'style' => 'normal',
+                'weight' => '700',
+                'display' => 'swap',
+                'files' => ['ttf' => '/fonts/roboto/700/roboto-700.ttf'],
+                'version' => 'v47',
+                'local' => true,
+            ],
+            get_object_vars($font->toFont('700'))
+        );
+    }
+
+    public static function variantFamilies(): array
+    {
+        return [
+            'variant without a family takes the font family' => ['', 'Roboto'],
+            'variant family is kept' => ['Roboto Flex', 'Roboto Flex'],
+        ];
+    }
+
+    public function testToFileAndToStorageShapes(): void
+    {
+        $font = (new Font())->sets([
+            'id' => 'my-font',
+            'family' => 'My Font',
+            'version' => 'V2',
+            'variants' => [3 => 'regular', 5 => 'bold'],
+        ]);
+        $font->isLocal(true);
+
+        $this->assertSame(
+            [
+                ['id' => 'my-font', 'family' => 'My Font', 'local' => true, 'version' => 'V2'],
+                ['local' => true, 'id' => 'my-font', 'family' => 'My Font', 'category' => '', 'version' => 'V2', 'lastModified' => '', 'variants' => ['regular', 'bold']],
+            ],
+            [$font->toFile(), $font->toStorage()]
+        );
+    }
+
+    private function thrownBy(callable $action): \Throwable
+    {
+        try {
+            $action();
+        } catch (\Throwable $e) {
+            return $e;
+        }
+
+        $this->fail('Expected an exception, none was thrown');
     }
 }

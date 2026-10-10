@@ -1,0 +1,26 @@
+[
+  {
+    "id": "open-sans",
+    "family": "Open Sans",
+    "variants": ["300", "regular", "italic", "700", "700italic"],
+    "subsets": ["cyrillic", "greek", "latin", "latin-ext"],
+    "category": "sans-serif",
+    "version": "v40",
+    "lastModified": "2024-05-01",
+    "popularity": 2,
+    "defSubset": "latin",
+    "defVariant": "regular"
+  },
+  {
+    "id": "roboto-mono",
+    "family": "Roboto Mono",
+    "variants": ["regular", "700"],
+    "subsets": ["latin"],
+    "category": "monospace",
+    "version": "v23",
+    "lastModified": "2024-02-29",
+    "popularity": 120,
+    "defSubset": "latin",
+    "defVariant": "regular"
+  }
+]

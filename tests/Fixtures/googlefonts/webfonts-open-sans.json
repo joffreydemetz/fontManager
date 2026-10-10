@@ -1,0 +1,22 @@
+{
+  "kind": "webfonts#webfontList",
+  "items": [
+    {
+      "family": "Open Sans",
+      "variants": ["300", "regular", "italic", "700", "700italic"],
+      "subsets": ["cyrillic", "greek", "latin", "latin-ext"],
+      "version": "v40",
+      "lastModified": "2024-05-01",
+      "files": {
+        "300": "https://fonts.gstatic.com/s/opensans/v40/open-sans-300.ttf",
+        "regular": "https://fonts.gstatic.com/s/opensans/v40/open-sans-regular.ttf",
+        "italic": "https://fonts.gstatic.com/s/opensans/v40/open-sans-italic.ttf",
+        "700": "https://fonts.gstatic.com/s/opensans/v40/open-sans-700.ttf",
+        "700italic": "https://fonts.gstatic.com/s/opensans/v40/open-sans-700italic.ttf"
+      },
+      "category": "sans-serif",
+      "kind": "webfonts#webfont",
+      "menu": "https://fonts.gstatic.com/s/opensans/v40/open-sans-menu.ttf"
+    }
+  ]
+}

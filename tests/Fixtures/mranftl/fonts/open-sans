@@ -1,0 +1,43 @@
+{
+  "id": "open-sans",
+  "family": "Open Sans",
+  "subsets": ["cyrillic", "greek", "latin", "latin-ext"],
+  "category": "sans-serif",
+  "version": "v40",
+  "lastModified": "2024-05-01",
+  "popularity": 2,
+  "defSubset": "latin",
+  "defVariant": "regular",
+  "subsetMap": {"cyrillic": false, "greek": false, "latin": true, "latin-ext": false},
+  "storeID": "latin",
+  "variants": [
+    {
+      "id": "300",
+      "fontFamily": "'Open Sans'",
+      "fontStyle": "normal",
+      "fontWeight": "300",
+      "eot": "https://fonts.gstatic.com/l/open-sans-v40-latin-300.eot",
+      "woff": "https://fonts.gstatic.com/l/open-sans-v40-latin-300.woff",
+      "woff2": "https://fonts.gstatic.com/l/open-sans-v40-latin-300.woff2",
+      "svg": "https://fonts.gstatic.com/l/open-sans-v40-latin-300.svg",
+      "ttf": "https://fonts.gstatic.com/l/open-sans-v40-latin-300.ttf"
+    },
+    {
+      "id": "regular",
+      "fontFamily": "'Open Sans'",
+      "fontStyle": "normal",
+      "fontWeight": "400",
+      "woff2": "https://fonts.gstatic.com/l/open-sans-v40-latin-regular.woff2",
+      "ttf": "https://fonts.gstatic.com/l/open-sans-v40-latin-regular.ttf"
+    },
+    {
+      "id": "700italic",
+      "fontFamily": "'Open Sans'",
+      "fontStyle": "italic",
+      "fontWeight": "700",
+      "woff": "",
+      "woff2": "https://fonts.gstatic.com/l/open-sans-v40-latin-700italic.woff2",
+      "ttf": "https://fonts.gstatic.com/l/open-sans-v40-latin-700italic.ttf"
+    }
+  ]
+}

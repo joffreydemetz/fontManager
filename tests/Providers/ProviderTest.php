@@ -4,31 +4,50 @@ namespace JDZ\FontManager\Tests\Providers;
 
 use PHPUnit\Framework\TestCase;
 use JDZ\FontManager\Providers\Provider;
+use JDZ\FontManager\Tests\Support\Arrays;
+use JDZ\FontManager\Tests\Support\FakeProvider;
 
 class ProviderTest extends TestCase
 {
-    public function testProviderCanBeMocked(): void
+    public function testListKeysTheFormattedFontsById(): void
     {
-        $provider = $this->getMockBuilder(Provider::class)
-            ->onlyMethods(['fetchList', 'fetchInfos'])
-            ->getMock();
+        $provider = new FakeProvider([
+            [
+                'id' => 'open-sans',
+                'family' => 'Open Sans',
+                'version' => 'v40',
+                'lastModified' => '2024-05-01',
+                'category' => 'sans-serif',
+                'variants' => ['regular', '700'],
+                'subsets' => ['latin'],
+                'kind' => 'webfonts#webfont',
+            ],
+            [
+                'id' => 'icons',
+                'family' => 'Icons',
+                'version' => 'V1',
+                'lastModified' => '',
+                'category' => '',
+                'variants' => [],
+                'subsets' => [],
+            ],
+        ]);
 
-        $this->assertInstanceOf(Provider::class, $provider);
-    }
-
-    public function testListReturnsArray(): void
-    {
-        $provider = $this->getMockBuilder(Provider::class)
-            ->onlyMethods(['fetchList', 'fetchInfos'])
-            ->getMock();
-
-        $provider->expects($this->once())
-            ->method('fetchList')
-            ->willReturn([]);
-
-        $result = $provider->list();
-
-        $this->assertIsArray($result);
+        $this->assertSame(
+            [
+                'open-sans' => [
+                    'id' => 'open-sans',
+                    'family' => 'Open Sans',
+                    'version' => 'v40',
+                    'lastModified' => '2024-05-01',
+                    'category' => 'sans-serif',
+                    'variants' => ['regular', '700'],
+                    'subsets' => ['latin'],
+                ],
+                'icons' => ['id' => 'icons', 'family' => 'Icons', 'version' => 'V1', 'lastModified' => '', 'category' => ''],
+            ],
+            Arrays::export($provider->list())
+        );
     }
 
     public function testInfosReturnsFalseWhenFetchFails(): void
@@ -70,8 +89,17 @@ class ProviderTest extends TestCase
 
         $result = $provider->infos('test-font', 'Test Font');
 
-        $this->assertIsObject($result);
-        $this->assertEquals('test-font', $result->id);
-        $this->assertEquals('Test Font', $result->family);
+        $this->assertSame(
+            [
+                'id' => 'test-font',
+                'family' => 'Test Font',
+                'version' => 'v1.0',
+                'lastModified' => '2026-01-01',
+                'category' => 'sans-serif',
+                'variants' => ['regular'],
+                'subsets' => ['latin'],
+            ],
+            get_object_vars($result)
+        );
     }
 }
