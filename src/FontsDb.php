@@ -28,6 +28,7 @@ class FontsDb
   private array $providers = [];
   private array $fonts = [];
   private bool $distantLoaded = false;
+  private bool $loaded = false;
 
   public function __construct(string $fontsPath, array $formats = ['ttf', 'woff2', 'woff'])
   {
@@ -37,9 +38,15 @@ class FontsDb
     $this->formats = $formats;
   }
 
+  /**
+   * Saves the index, once it was loaded: an index never loaded (or whose load
+   * failed) used to be rewritten as an empty list.
+   */
   public function __destruct()
   {
-    $this->save();
+    if (true === $this->loaded) {
+      $this->save();
+    }
   }
 
   public function addProvider(Provider $provider): self
@@ -56,6 +63,7 @@ class FontsDb
 
     $this->loadFromYml();
     $this->loadFromFolder();
+    $this->loaded = true;
 
     if (true === $prefetch) {
       $this->loadDistantFonts(true);
@@ -226,6 +234,9 @@ class FontsDb
       throw (new FontException('Font is local and cannot be installed ..'))
         ->setFontData($family, $weight, $style, $variantId, $subsets);
     }
+
+    // a subset the font does not have (install() used to return quietly)
+    $font->checkAvailableSubsets($subsets);
 
     $infos = false;
 
@@ -403,7 +414,7 @@ class FontsDb
         $variantData->family = $variantData->family ?? $font->getFamily();
         unset($variantData->filename);
 
-        $variantData->id = (string)$variantData->id;
+        $variantData->id = (string)($variantData->id ?? '');
         $variantData->weight = (string)$variantData->weight;
         $variantData->style = (string)$variantData->style;
 
@@ -615,8 +626,9 @@ class FontsDb
 
   private function formatVariantId(string $weight, string $style): string
   {
-    if ('' === $style && '' === $weight) {
-      return 'regular';
+    // no weight is the normal one ('' with a style 'normal' used to give '')
+    if ('' === $weight) {
+      $weight = '400';
     }
 
     if ('italic' === $style) {

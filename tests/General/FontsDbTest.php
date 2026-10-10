@@ -674,4 +674,71 @@ class FontsDbTest extends TestCase
 
         $this->fail('Expected an exception, none was thrown');
     }
+
+    // --- regressions ---
+
+    /**
+     * The destructor saved whatever was in memory: an index never loaded (or whose
+     * load failed) was rewritten as an empty list, its variants and subsets lost.
+     */
+    public function testAnIndexNeverLoadedIsLeftAsItWas(): void
+    {
+        $this->writeYaml('fonts.yml', [['id' => 'lobster', 'family' => 'Lobster', 'variants' => ['regular']]]);
+        $before = file_get_contents($this->fontsPath . '/fonts.yml');
+
+        $db = new FontsDb($this->fontsPath);
+        unset($db);
+
+        $this->assertSame($before, file_get_contents($this->fontsPath . '/fonts.yml'));
+    }
+
+    public function testAnIndexThatFailedToLoadIsLeftAsItWas(): void
+    {
+        file_put_contents($this->fontsPath . '/fonts.yml', "fonts: [unclosed\n");
+
+        $db = new FontsDb($this->fontsPath);
+        $this->thrownBy(fn() => $db->load());
+        unset($db);
+
+        $this->assertSame("fonts: [unclosed\n", file_get_contents($this->fontsPath . '/fonts.yml'));
+    }
+
+    /**
+     * No weight is 400: formatVariantId('', 'normal') gave '' (not 'regular').
+     */
+    public function testAVariantWithoutAWeightIsRegular(): void
+    {
+        $this->writeYaml('fonts.yml', [['id' => 'roboto', 'family' => 'Roboto', 'variants' => ['regular']]]);
+
+        $db = (new FontsDb($this->fontsPath))->load();
+
+        $this->assertTrue($db->isAvailable('Roboto', null, 'normal'));
+    }
+
+    /**
+     * A variant font.yml without an id key used to be an "Undefined property" warning.
+     */
+    public function testAVariantFileWithoutAnIdIsNamedFromItsWeightAndStyle(): void
+    {
+        $this->writeYaml('fonts.yml', [['id' => 'roboto', 'family' => 'Roboto', 'variants' => ['700']]]);
+        $this->writeYaml('roboto/font.yml', ['id' => 'roboto', 'family' => 'Roboto']);
+        $this->writeVariant('roboto', '700', ['family' => 'Roboto', 'weight' => '700'], ['ttf', 'woff', 'woff2']);
+
+        $db = (new FontsDb($this->fontsPath))->load();
+
+        $this->assertTrue($db->isInstalled('Roboto', 700));
+    }
+
+    /**
+     * install() returned quietly for a subset the font does not have.
+     */
+    public function testInstallRefusesASubsetTheFontDoesNotHave(): void
+    {
+        $this->seed();
+        $db = (new FontsDb($this->fontsPath))->addProvider($this->openSansProvider())->load();
+
+        $e = $this->thrownBy(fn() => $db->install('Open Sans/700italic@cyrillic'));
+
+        $this->assertSame([\Exception::class, 'Subset cyrillic is not available'], [$e::class, $e->getMessage()]);
+    }
 }
