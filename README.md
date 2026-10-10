@@ -127,6 +127,8 @@ composer test
 
 ## Changelog
 
+- **2.1.2** — `FontsDb` saves on destruct only once `load()` succeeded (an index never loaded, or whose load failed, was rewritten as an empty `fonts.yml`). A failed woff/woff2 conversion leaves the format missing and the variant not installed (it was recorded anyway); subset unicode ranges are joined with `, ` and cyrillic has its `U+`; no subset keeps every glyph; `pyftsubset` arguments are shell-quoted. A variant without weight is `regular`; a variant `font.yml` without `id` loads; `install()` refuses a subset the font does not have; a Google Fonts API error fails the font list instead of an empty catalog.
+
 - **2.1.1** — `install()` on a font unknown locally loads the provider catalogs itself and throws `FontNotAvailableException` instead of failing on an undefined key; the unused `tecnickcom/tc-lib-pdf-font` requirement is dropped.
 - **2.1.0** — Example uses a generic custom font name.
 - **2.0.2** — Test coverage configuration.
