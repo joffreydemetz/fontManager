@@ -184,4 +184,21 @@ class GooglefontsProviderTest extends TestCase
 
         $this->fail('Expected an exception, none was thrown');
     }
+
+    /**
+     * An API error body (invalid key) has no items: it used to be an "Undefined
+     * property" warning and an empty catalog.
+     */
+    public function testListFailsOnAnApiError(): void
+    {
+        $path = $this->response('{"error":{"code":400,"message":"API key not valid."}}');
+        $provider = new LocalGooglefontsProvider($path, 'test-key');
+
+        $e = $this->thrownBy(fn() => $provider->list());
+
+        $this->assertSame(
+            [\Exception::class, 'Error updating font list from ' . Files::url($path) . '?key=test-key'],
+            [$e::class, $e->getMessage()]
+        );
+    }
 }

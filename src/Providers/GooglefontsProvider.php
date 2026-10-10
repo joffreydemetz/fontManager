@@ -43,7 +43,11 @@ class GooglefontsProvider extends Provider
       throw new \Exception('Error updating font list from ' . $this->providerUrl);
     }
 
+    // an API error body (an invalid key) has no items: it used to be a warning and an empty catalog
     $response = \json_decode($result);
+    if (!isset($response->items)) {
+      throw new \Exception('Error updating font list from ' . $this->providerUrl);
+    }
     $items = (array)$response->items;
 
     foreach ($items as $item) {
