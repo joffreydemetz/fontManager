@@ -40,13 +40,13 @@ class GooglefontsProvider extends Provider
     $result = \curl_exec($ch);
 
     if (!$result) {
-      throw new \Exception('Error updating font list from ' . $this->providerUrl);
+      throw new \Exception('Error updating font list from ' . $this->maskedUrl());
     }
 
     // an API error body (an invalid key) has no items: it used to be a warning and an empty catalog
     $response = \json_decode($result);
     if (!isset($response->items)) {
-      throw new \Exception('Error updating font list from ' . $this->providerUrl);
+      throw new \Exception('Error updating font list from ' . $this->maskedUrl());
     }
     $items = (array)$response->items;
 
@@ -120,6 +120,12 @@ class GooglefontsProvider extends Provider
     $font = $this->formatFont($infos);
     $font->fontVariants = $fontVariants;
     return $font;
+  }
+
+  /** the provider URL for a message: the API key masked (it used to be printed) */
+  private function maskedUrl(): string
+  {
+    return (string)preg_replace('/([?&]key=)[^&]*/', '$1***', $this->providerUrl);
   }
 
   private function formatFontId(object $data): string

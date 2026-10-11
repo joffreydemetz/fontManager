@@ -113,10 +113,11 @@ class GooglefontsProviderTest extends TestCase
     }
 
     /**
-     * The failure message names the requested URL, so it shows which API key the constructor picked.
+     * The failure message names the requested URL with the API key masked (2.1.3: the
+     * key used to be printed, whichever source the constructor picked it from).
      */
     #[DataProvider('apiKeys')]
-    public function testListFailureNamesTheRequestedUrl(?string $argument, ?string $env, string $key): void
+    public function testListFailureNamesTheRequestedUrlWithTheKeyMasked(?string $argument, ?string $env, string $key): void
     {
         if (null === $env) {
             unset($_ENV['GOOGLE_FONTS_API_KEY']);
@@ -129,9 +130,12 @@ class GooglefontsProviderTest extends TestCase
         $e = $this->thrownBy(fn() => $provider->list());
 
         $this->assertSame(
-            [\Exception::class, 'Error updating font list from ' . Files::url($path) . '?key=' . $key],
+            [\Exception::class, 'Error updating font list from ' . Files::url($path) . '?key=***'],
             [$e::class, $e->getMessage()]
         );
+        if ('' !== $key) {
+            $this->assertStringNotContainsString($key, $e->getMessage());
+        }
     }
 
     public static function apiKeys(): array
@@ -153,7 +157,7 @@ class GooglefontsProviderTest extends TestCase
         $e = $this->thrownBy(fn() => $provider->list());
 
         $this->assertSame(
-            [\Exception::class, 'Error updating font list from ' . Files::url($path) . '?key=test-key'],
+            [\Exception::class, 'Error updating font list from ' . Files::url($path) . '?key=***'],
             [$e::class, $e->getMessage()]
         );
     }
@@ -197,7 +201,7 @@ class GooglefontsProviderTest extends TestCase
         $e = $this->thrownBy(fn() => $provider->list());
 
         $this->assertSame(
-            [\Exception::class, 'Error updating font list from ' . Files::url($path) . '?key=test-key'],
+            [\Exception::class, 'Error updating font list from ' . Files::url($path) . '?key=***'],
             [$e::class, $e->getMessage()]
         );
     }
