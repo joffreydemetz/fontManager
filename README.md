@@ -68,7 +68,7 @@ is in [examples/example.php](examples/example.php).
 
 Every query method takes `(string $family, string|int|null $weight = null, ?string $style = null, ?array $subsets = null)`:
 
-- `$weight` — `100`…`900`, or `extralight` (100), `light` (300), `bold` (700), `extrabold` (900), `regular`; a `…italic` suffix sets the style (`'700italic'`).
+- `$weight` — `100`…`900`, or `extralight` (200), `light` (300), `bold` (700), `extrabold` (800), `regular`; a `…italic` suffix sets the style (`'700italic'`).
 - The same query can be packed into the family string: `'Family/variant@subset1,subset2'` (`'Roboto/regular@latin'`, `'Montserrat/700italic@latin,latin-ext'`).
 
 ## API
@@ -127,6 +127,7 @@ composer test
 
 ## Changelog
 
+- **2.1.3** — `extralight` is weight 200 and `extrabold` 800, the CSS names (they read as 100 / 900); the YAML inline level reaches `Yaml::dump()` (it went to `dumpFile()`, which ignored it): the lists of `fonts.yml` and the `font.yml` files nest as blocks — regenerate once; the Google Fonts API key is masked in the error messages.
 - **2.1.2** — `FontsDb` saves on destruct only once `load()` succeeded (an index never loaded, or whose load failed, was rewritten as an empty `fonts.yml`). A failed woff/woff2 conversion leaves the format missing and the variant not installed (it was recorded anyway); subset unicode ranges are joined with `, ` and cyrillic has its `U+`; no subset keeps every glyph; `pyftsubset` arguments are shell-quoted. A variant without weight is `regular`; a variant `font.yml` without `id` loads; `install()` refuses a subset the font does not have; a Google Fonts API error fails the font list instead of an empty catalog.
 
 - **2.1.1** — `install()` on a font unknown locally loads the provider catalogs itself and throws `FontNotAvailableException` instead of failing on an undefined key; the unused `tecnickcom/tc-lib-pdf-font` requirement is dropped.
