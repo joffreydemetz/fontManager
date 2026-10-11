@@ -94,10 +94,11 @@ class FontsDbTest extends TestCase
             'weight in the query' => [['Roboto Mono/500'], 'Font: Roboto Mono - Weight: 500 - Variant: 500'],
             'italic weight in the query' => [['Roboto Mono/500italic'], 'Font: Roboto Mono - Weight: 500 - Style: italic - Variant: 500italic'],
             'regular in the query' => [['Roboto Mono/regular'], 'Font: Roboto Mono - Variant: regular'],
-            'extralight' => [['Roboto Mono/extralight'], 'Font: Roboto Mono - Weight: 100 - Variant: 100'],
+            // 2.1.3: the CSS names — extra-light is 200, extra-bold 800 (they read as 100 / 900)
+            'extralight' => [['Roboto Mono/extralight'], 'Font: Roboto Mono - Weight: 200 - Variant: 200'],
             'light' => [['Roboto Mono/light'], 'Font: Roboto Mono - Weight: 300 - Variant: 300'],
             'bold' => [['Roboto Mono/bold'], 'Font: Roboto Mono - Weight: 700 - Variant: 700'],
-            'extrabold' => [['Roboto Mono/extrabold'], 'Font: Roboto Mono - Weight: 900 - Variant: 900'],
+            'extrabold' => [['Roboto Mono/extrabold'], 'Font: Roboto Mono - Weight: 800 - Variant: 800'],
             'named weight with italic' => [['Roboto Mono/lightitalic'], 'Font: Roboto Mono - Weight: 300 - Style: italic - Variant: 300italic'],
             'weight argument' => [['Roboto Mono', 500], 'Font: Roboto Mono - Weight: 500 - Variant: 500'],
             'named weight argument' => [['Roboto Mono', 'bold'], 'Font: Roboto Mono - Weight: 700 - Variant: 700'],
@@ -358,6 +359,21 @@ class FontsDbTest extends TestCase
             'open-sans/700italic/open-sans-700italic.woff2' => 'woff2 bytes',
             'open-sans/font.yml' => ['id' => 'open-sans', 'family' => 'Open Sans', 'category' => 'sans-serif', 'version' => 'v1', 'lastModified' => '2024-01-01'],
         ], $this->folderContents());
+    }
+
+    /**
+     * 2.1.3: the inline level reaches Yaml::dump() (it was handed to Filesystem::dumpFile(),
+     * which ignored it): the lists of the index nest as blocks, not inline.
+     */
+    public function testTheIndexIsWrittenWithBlockListsNotInlineOnes(): void
+    {
+        $db = (new FontsDb($this->fontsPath))->addProvider($this->openSansProvider())->load();
+
+        $db->install('Open Sans/700italic@latin');
+
+        $index = (string) file_get_contents($this->fontsPath . '/fonts.yml');
+        $this->assertStringNotContainsString('[', $index, 'no inline list');
+        $this->assertMatchesRegularExpression('/^\s+- regular$/m', $index);
     }
 
     public function testInstalledVariantSurvivesAReload(): void

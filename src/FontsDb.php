@@ -582,8 +582,9 @@ class FontsDb
     }
 
     switch ($weight) {
+      // the CSS names: extra-light is 200, extra-bold 800 (they read as 100 / 900)
       case 'extralight':
-        $weight = '100';
+        $weight = '200';
         break;
       case 'light':
         $weight = '300';
@@ -592,7 +593,7 @@ class FontsDb
         $weight = '700';
         break;
       case 'extrabold':
-        $weight = '900';
+        $weight = '800';
         break;
       case 'regular':
         $weight = '';
