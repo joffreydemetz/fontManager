@@ -545,7 +545,8 @@ class FontsDb
   {
     try {
       $fs = new Filesystem();
-      $fs->dumpFile($path, Yaml::dump((array)$data), $maxLevel);
+      // the inline level goes to Yaml::dump() (it went to dumpFile(), which ignored it)
+      $fs->dumpFile($path, Yaml::dump((array)$data, $maxLevel));
       $fs->chmod($path, 0755);
     } catch (\Throwable $e) {
       throw new \Exception('Error dumping the Yml file .. ' . $e->getMessage());
